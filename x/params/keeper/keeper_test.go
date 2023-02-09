@@ -193,7 +193,7 @@ func TestSubspace(t *testing.T) {
 		{"uint32", uint32(1), uint32(0), new(uint32)},
 		{"uint64", uint64(1), uint64(0), new(uint64)},
 		{"int", sdk.NewInt(1), math.Int{}, new(math.Int)},
-		{"uint", sdk.NewUint(1), sdk.Uint{}, new(sdk.Uint)},
+		{"uint", sdk.NewUint(1), math.Uint{}, new(math.Uint)},
 		{"dec", math.LegacyNewDec(1), sdk.Dec{}, new(sdk.Dec)},
 		{"struct", s{1}, s{0}, new(s)},
 	}

@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"sort"
 
+	"cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/crypto"
 
 	"github.com/cosmos/cosmos-sdk/internal/conv"
-	"github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // Len is the length of base addresses

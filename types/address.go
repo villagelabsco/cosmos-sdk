@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	errorsmod "cosmossdk.io/errors"
 	"github.com/hashicorp/golang-lru/simplelru"
 	"sigs.k8s.io/yaml"
 
@@ -153,11 +154,11 @@ func VerifyAddressFormat(bz []byte) error {
 	}
 
 	if len(bz) == 0 {
-		return sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "addresses cannot be empty")
+		return errorsmod.Wrap(sdkerrors.ErrUnknownAddress, "addresses cannot be empty")
 	}
 
 	if len(bz) > address.MaxAddrLen {
-		return sdkerrors.Wrapf(sdkerrors.ErrUnknownAddress, "address max length is %d, got %d", address.MaxAddrLen, len(bz))
+		return errorsmod.Wrapf(sdkerrors.ErrUnknownAddress, "address max length is %d, got %d", address.MaxAddrLen, len(bz))
 	}
 
 	return nil

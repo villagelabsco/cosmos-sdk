@@ -3,6 +3,7 @@ package ante
 import (
 	"fmt"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -39,11 +40,11 @@ func NewDeductFeeDecorator(ak AccountKeeper, bk types.BankKeeper, fk FeegrantKee
 func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
-		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
+		return ctx, errors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
 	if !simulate && ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
-		return ctx, sdkerrors.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
+		return ctx, errors.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
 	var (
@@ -70,7 +71,7 @@ func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 func (dfd DeductFeeDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee sdk.Coins) error {
 	feeTx, ok := sdkTx.(sdk.FeeTx)
 	if !ok {
-		return sdkerrors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
+		return errors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
 	if addr := dfd.accountKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
@@ -89,7 +90,7 @@ func (dfd DeductFeeDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee 
 		} else if !feeGranter.Equals(feePayer) {
 			err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, fee, sdkTx.GetMsgs())
 			if err != nil {
-				return sdkerrors.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
+				return errors.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
 			}
 		}
 
@@ -124,12 +125,12 @@ func (dfd DeductFeeDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee 
 // DeductFees deducts fees from the given account.
 func DeductFees(bankKeeper types.BankKeeper, ctx sdk.Context, acc sdk.AccountI, fees sdk.Coins) error {
 	if !fees.IsValid() {
-		return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", fees)
+		return errors.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", fees)
 	}
 
 	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.FeeCollectorName, fees)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
+		return errors.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
 	}
 
 	return nil

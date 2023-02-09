@@ -3,6 +3,7 @@ package v1
 import (
 	"fmt"
 
+	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -139,10 +140,10 @@ func (msg MsgDeposit) ValidateBasic() error {
 	}
 	amount := sdk.NewCoins(msg.Amount...)
 	if !amount.IsValid() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, amount.String())
+		return errors.Wrap(sdkerrors.ErrInvalidCoins, amount.String())
 	}
 	if amount.IsAnyNegative() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, amount.String())
+		return errors.Wrap(sdkerrors.ErrInvalidCoins, amount.String())
 	}
 
 	return nil

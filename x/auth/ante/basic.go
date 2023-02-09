@@ -1,6 +1,7 @@
 package ante
 
 import (
+	"cosmossdk.io/errors"
 	storetypes "cosmossdk.io/store/types"
 
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
@@ -52,14 +53,14 @@ func NewValidateMemoDecorator(ak AccountKeeper) ValidateMemoDecorator {
 func (vmd ValidateMemoDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
 	memoTx, ok := tx.(sdk.TxWithMemo)
 	if !ok {
-		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "invalid transaction type")
+		return ctx, errors.Wrap(sdkerrors.ErrTxDecode, "invalid transaction type")
 	}
 
 	memoLength := len(memoTx.GetMemo())
 	if memoLength > 0 {
 		params := vmd.ak.GetParams(ctx)
 		if uint64(memoLength) > params.MaxMemoCharacters {
-			return ctx, sdkerrors.Wrapf(sdkerrors.ErrMemoTooLarge,
+			return ctx, errors.Wrapf(sdkerrors.ErrMemoTooLarge,
 				"maximum number of characters is %d but received %d characters",
 				params.MaxMemoCharacters, memoLength,
 			)
@@ -195,12 +196,12 @@ func NewTxTimeoutHeightDecorator() TxTimeoutHeightDecorator {
 func (txh TxTimeoutHeightDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
 	timeoutTx, ok := tx.(TxWithTimeoutHeight)
 	if !ok {
-		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "expected tx to implement TxWithTimeoutHeight")
+		return ctx, errors.Wrap(sdkerrors.ErrTxDecode, "expected tx to implement TxWithTimeoutHeight")
 	}
 
 	timeoutHeight := timeoutTx.GetTimeoutHeight()
 	if timeoutHeight > 0 && uint64(ctx.BlockHeight()) > timeoutHeight {
-		return ctx, sdkerrors.Wrapf(
+		return ctx, errors.Wrapf(
 			sdkerrors.ErrTxTimeoutHeight, "block height: %d, timeout height: %d", ctx.BlockHeight(), timeoutHeight,
 		)
 	}

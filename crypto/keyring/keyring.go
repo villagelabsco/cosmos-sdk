@@ -927,7 +927,7 @@ func (ks keystore) migrate(key string) (*Record, error) {
 	}
 
 	if len(item.Data) == 0 {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, key)
+		return nil, errors.Wrap(sdkerrors.ErrKeyNotFound, key)
 	}
 
 	// 2. Try to deserialize using proto

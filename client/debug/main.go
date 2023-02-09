@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -14,7 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/version"
 
 	legacybech32 "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32" //nolint:staticcheck // we do old keys, they're keys after all.
@@ -143,7 +144,7 @@ $ %s debug pubkey-raw cosmos1e0jnq2sun3dzjh8p2xq95kk0expwmd7shwjpfg
 			}
 			pubkeyType = strings.ToLower(pubkeyType)
 			if pubkeyType != "secp256k1" && pubkeyType != ed {
-				return errors.Wrapf(errors.ErrInvalidType, "invalid pubkey type, expected oneof ed25519 or secp256k1")
+				return errors.Wrapf(sdkerrors.ErrInvalidType, "invalid pubkey type, expected oneof ed25519 or secp256k1")
 			}
 
 			pk, err := getPubKeyFromRawString(args[0], pubkeyType)
