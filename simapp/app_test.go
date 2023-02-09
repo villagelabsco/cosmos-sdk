@@ -272,10 +272,6 @@ func TestUpgradeStateOnGenesis(t *testing.T) {
 }
 
 func TestMergedRegistry(t *testing.T) {
-	var err error
-	require.NotPanics(t, func() {
-		_, err = proto.MergedRegistry()
-
-	})
+	_, err := proto.MergedRegistry()
 	require.NoError(t, err)
 }
