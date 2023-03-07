@@ -42,6 +42,7 @@ type Context struct {
 	BroadcastMode     string
 	FromName          string
 	SignModeStr       string
+	Permit            string
 	UseLedger         bool
 	Simulate          bool
 	GenerateOnly      bool
@@ -164,6 +165,12 @@ func (ctx Context) WithHomeDir(dir string) Context {
 // WithKeyringDir returns a copy of the Context with KeyringDir set.
 func (ctx Context) WithKeyringDir(dir string) Context {
 	ctx.KeyringDir = dir
+	return ctx
+}
+
+// WithPermit returns a copy of the Context with the viewing permit set.
+func (ctx Context) WithPermit(permit string) Context {
+	ctx.Permit = permit
 	return ctx
 }
 

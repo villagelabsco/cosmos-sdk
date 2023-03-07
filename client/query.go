@@ -90,9 +90,18 @@ func (ctx Context) queryABCI(req abci.RequestQuery) (abci.ResponseQuery, error) 
 		queryHeight = ctx.Height
 	}
 
+	var queryPermit string
+	if req.Permit != "" {
+		queryPermit = req.Permit
+	} else {
+		// fallback on the context permit
+		queryPermit = ctx.Permit
+	}
+
 	opts := rpcclient.ABCIQueryOptions{
 		Height: queryHeight,
 		Prove:  req.Prove,
+		Permit: queryPermit,
 	}
 
 	result, err := node.ABCIQueryWithOptions(context.Background(), req.Path, req.Data, opts)
@@ -133,6 +142,7 @@ func (ctx Context) query(path string, key tmbytes.HexBytes) ([]byte, int64, erro
 		Path:   path,
 		Data:   key,
 		Height: ctx.Height,
+		Permit: ctx.Permit,
 	})
 	if err != nil {
 		return nil, 0, err
