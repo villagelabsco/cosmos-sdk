@@ -85,6 +85,7 @@ const (
 	// FlagOutput is the flag to set the output format.
 	// This differs from FlagOutputDocument that is used to set the output file.
 	FlagOutput = "output"
+	FlagAuth   = "auth"
 	// Logging flags
 	FlagLogLevel   = "log_level"
 	FlagLogFormat  = "log_format"
@@ -108,6 +109,7 @@ func AddQueryFlagsToCmd(cmd *cobra.Command) {
 	cmd.Flags().Bool(FlagGRPCInsecure, false, "allow gRPC over insecure channels, if not the server must use TLS")
 	cmd.Flags().Int64(FlagHeight, 0, "Use a specific height to query state at (this can error if the node is pruning state)")
 	cmd.Flags().StringP(FlagOutput, "o", "text", "Output format (text|json)")
+	cmd.Flags().String(FlagAuth, "", "Pass an auth token for permissioned queries (base64-encoded signed msg signed by an account which has the proper RBAC role / viewing permit)")
 
 	// some base commands does not require chainID e.g `simd testnet` while subcommands do
 	// hence the flag should not be required for those commands

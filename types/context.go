@@ -63,6 +63,7 @@ type Context struct {
 	streamingManager     storetypes.StreamingManager
 	cometInfo            comet.BlockInfo
 	headerInfo           header.Info
+	permit               string
 }
 
 // Proposed rename, not done to avoid API breakage
@@ -90,6 +91,7 @@ func (c Context) TransientKVGasConfig() storetypes.GasConfig    { return c.trans
 func (c Context) StreamingManager() storetypes.StreamingManager { return c.streamingManager }
 func (c Context) CometInfo() comet.BlockInfo                    { return c.cometInfo }
 func (c Context) HeaderInfo() header.Info                       { return c.headerInfo }
+func (c Context) Permit() string                                { return c.permit }
 
 // clone the header before returning
 func (c Context) BlockHeader() cmtproto.Header {
@@ -189,6 +191,12 @@ func (c Context) WithBlockHeight(height int64) Context {
 	newHeader := c.BlockHeader()
 	newHeader.Height = height
 	return c.WithBlockHeader(newHeader)
+}
+
+// WithPermit returns a Context with an updated query permit.
+func (c Context) WithPermit(permit string) Context {
+	c.permit = permit
+	return c
 }
 
 // WithChainID returns a Context with an updated chain identifier.

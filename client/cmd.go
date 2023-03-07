@@ -199,6 +199,11 @@ func readQueryCommandFlags(clientCtx Context, flagSet *pflag.FlagSet) (Context, 
 		clientCtx = clientCtx.WithUseLedger(useLedger)
 	}
 
+	if clientCtx.Permit == "" || flagSet.Changed(flags.FlagAuth) {
+		permit, _ := flagSet.GetString(flags.FlagAuth)
+		clientCtx = clientCtx.WithPermit(permit)
+	}
+
 	return ReadPersistentCommandFlags(clientCtx, flagSet)
 }
 
