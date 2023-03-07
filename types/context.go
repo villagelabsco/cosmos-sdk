@@ -41,6 +41,7 @@ type Context struct {
 	priority             int64 // The tx priority, only relevant in CheckTx
 	kvGasConfig          storetypes.GasConfig
 	transientKVGasConfig storetypes.GasConfig
+	permit               string
 }
 
 // Proposed rename, not done to avoid API breakage
@@ -64,6 +65,7 @@ func (c Context) EventManager() *EventManager                { return c.eventMan
 func (c Context) Priority() int64                            { return c.priority }
 func (c Context) KVGasConfig() storetypes.GasConfig          { return c.kvGasConfig }
 func (c Context) TransientKVGasConfig() storetypes.GasConfig { return c.transientKVGasConfig }
+func (c Context) Permit() string                             { return c.permit }
 
 // clone the header before returning
 func (c Context) BlockHeader() tmproto.Header {
@@ -162,6 +164,12 @@ func (c Context) WithBlockHeight(height int64) Context {
 	newHeader := c.BlockHeader()
 	newHeader.Height = height
 	return c.WithBlockHeader(newHeader)
+}
+
+// WithPermit returns a Context with an updated query permit.
+func (c Context) WithPermit(permit string) Context {
+	c.permit = permit
+	return c
 }
 
 // WithChainID returns a Context with an updated chain identifier.

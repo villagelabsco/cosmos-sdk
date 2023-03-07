@@ -81,6 +81,7 @@ const (
 	FlagReverse          = "reverse"
 	FlagTip              = "tip"
 	FlagAux              = "aux"
+	FlagAuth					   = "auth"
 
 	// Tendermint logging flags
 	FlagLogLevel  = "log_level"
@@ -98,6 +99,7 @@ func AddQueryFlagsToCmd(cmd *cobra.Command) {
 	cmd.Flags().Bool(FlagGRPCInsecure, false, "allow gRPC over insecure channels, if not TLS the server must use TLS")
 	cmd.Flags().Int64(FlagHeight, 0, "Use a specific height to query state at (this can error if the node is pruning state)")
 	cmd.Flags().StringP(tmcli.OutputFlag, "o", "text", "Output format (text|json)")
+	cmd.Flags().String(FlagAuth, "", "Pass an auth token for permissioned queries (base64-encoded signed msg signed by an account which has the proper RBAC role / viewing permit)")
 
 	// some base commands does not require chainID e.g `simd testnet` while subcommands do
 	// hence the flag should not be required for those commands

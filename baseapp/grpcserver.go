@@ -3,6 +3,7 @@ package baseapp
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	gogogrpc "github.com/gogo/protobuf/grpc"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -45,9 +46,21 @@ func (app *BaseApp) RegisterGRPCServer(server gogogrpc.Server) {
 			}
 		}
 
+		// When pushing requests through the HTTP server, the Authorization header gets loaded
+		// in the GRPC metadata as grpcgateway-authorization
+		// Get permit header from the request context, if present.
+		var permit string
+		if permitHeaders := md.Get(grpctypes.GRPCViewingPermitHeader); len(permitHeaders) == 1 {
+			authHeader := strings.Split(permitHeaders[0], " ")
+			if err := checkInvalidPermit(authHeader); err != nil {
+				return nil, err
+			}
+			permit = authHeader[1]
+		}
+
 		// Create the sdk.Context. Passing false as 2nd arg, as we can't
 		// actually support proofs with gRPC right now.
-		sdkCtx, err := app.createQueryContext(height, false)
+		sdkCtx, err := app.createQueryContext(height, false, permit)
 		if err != nil {
 			return nil, err
 		}

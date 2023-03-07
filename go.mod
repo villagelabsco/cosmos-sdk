@@ -165,6 +165,10 @@ replace (
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 
 	github.com/jhump/protoreflect => github.com/jhump/protoreflect v1.9.0
+
+	github.com/tendermint/tendermint => github.com/villagelabsco/tendermint v0.34.24-village-1
+	// Use for local development
+	// github.com/tendermint/tendermint => ../tendermint
 )
 
 retract (
