@@ -1117,7 +1117,7 @@ func (app *BaseApp) getContextForProposal(ctx sdk.Context, height int64) sdk.Con
 }
 
 func (app *BaseApp) handleQueryGRPC(handler GRPCQueryHandler, req *abci.RequestQuery) *abci.ResponseQuery {
-	ctx, err := app.CreateQueryContext(req.Height, req.Prove)
+	ctx, err := app.CreateQueryContext(req.Height, req.Prove, req.Permit)
 	if err != nil {
 		return sdkerrors.QueryResult(err, app.trace)
 	}
@@ -1164,9 +1164,20 @@ func checkNegativeHeight(height int64) error {
 	return nil
 }
 
+func checkInvalidPermit(authHeader []string) error {
+	if len(authHeader) != 2 {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "invalid auth header, expected Bearer <token>")
+	}
+	if authHeader[0] != "Bearer" {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "invalid auth header, expected Bearer <token>")
+	}
+	return nil
+}
+
 // createQueryContext creates a new sdk.Context for a query, taking as args
 // the block height and whether the query needs a proof or not.
-func (app *BaseApp) CreateQueryContext(height int64, prove bool) (sdk.Context, error) {
+// Village-specific additional parameter: permit, to handle permissions for queries
+func (app *BaseApp) CreateQueryContext(height int64, prove bool, permit string) (sdk.Context, error) {
 	if err := checkNegativeHeight(height); err != nil {
 		return sdk.Context{}, err
 	}
@@ -1216,7 +1227,8 @@ func (app *BaseApp) CreateQueryContext(height int64, prove bool) (sdk.Context, e
 	ctx := sdk.NewContext(cacheMS, app.checkState.ctx.BlockHeader(), true, app.logger).
 		WithMinGasPrices(app.minGasPrices).
 		WithBlockHeight(height).
-		WithGasMeter(storetypes.NewGasMeter(app.queryGasLimit))
+		WithGasMeter(storetypes.NewGasMeter(app.queryGasLimit)).
+		WithPermit(permit)
 
 	if height != lastBlockHeight {
 		rms, ok := app.cms.(*rootmulti.Store)
