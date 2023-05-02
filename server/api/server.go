@@ -107,12 +107,13 @@ func (s *Server) Start(cfg config.Config) error {
 	s.mtx.Unlock()
 
 	if cfg.API.EnableUnsafeCORS {
-		allowAllCORS := handlers.CORS(handlers.AllowedHeaders([]string{"Content-Type"}))
+		allowAllCORS := handlers.CORS(handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}))
 		return tmrpcserver.Serve(s.listener, allowAllCORS(h), s.logger, tmCfg)
 	}
 
 	s.logger.Info("starting API server...")
-	return tmrpcserver.Serve(s.listener, s.Router, s.logger, tmCfg)
+	allowAuthorizationCORS := handlers.CORS(handlers.AllowedHeaders([]string{"Authorization"}))
+	return tmrpcserver.Serve(s.listener, allowAuthorizationCORS(h), s.logger, tmCfg)
 }
 
 // Close closes the API server.
