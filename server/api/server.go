@@ -112,7 +112,14 @@ func (s *Server) Start(cfg config.Config) error {
 	}
 
 	s.logger.Info("starting API server...")
-	allowAuthorizationCORS := handlers.CORS(handlers.AllowedHeaders([]string{"Authorization"}))
+	// Allow some additional CORS middlewares to be able to pass the viewing permits
+	allowAuthorizationCORS := handlers.CORS(
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.AllowCredentials(),
+		handlers.AllowedMethods([]string{"GET"}),
+		handlers.AllowedOrigins([]string{"*"}),
+	)
+
 	return tmrpcserver.Serve(s.listener, allowAuthorizationCORS(h), s.logger, tmCfg)
 }
 
