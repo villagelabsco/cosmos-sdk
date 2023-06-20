@@ -166,9 +166,9 @@ replace (
 
 	github.com/jhump/protoreflect => github.com/jhump/protoreflect v1.9.0
 
-	github.com/tendermint/tendermint => github.com/villagelabsco/tendermint v0.34.24-village-1
-	// Use for local development
-	// github.com/tendermint/tendermint => ../tendermint
+	github.com/tendermint/tendermint => github.com/villagelabsco/tendermint v0.34.24-village-2
+// Use for local development
+// github.com/tendermint/tendermint => ../tendermint
 )
 
 retract (
