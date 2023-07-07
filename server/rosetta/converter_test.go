@@ -303,10 +303,12 @@ func (s *ConverterTestSuite) TestBalanceOps() {
 		subBalanceOp := bank.NewCoinSpentEvent(
 			sdk.AccAddress("test"),
 			sdk.NewCoins(sdk.NewInt64Coin("test", 10), sdk.NewInt64Coin("utxo", 10)),
+			sdk.NewCoins(sdk.NewInt64Coin("test", 10), sdk.NewInt64Coin("utxo", 10)),
 		)
 
 		addBalanceOp := bank.NewCoinReceivedEvent(
 			sdk.AccAddress("test"),
+			sdk.NewCoins(sdk.NewInt64Coin("test", 10), sdk.NewInt64Coin("utxo", 10)),
 			sdk.NewCoins(sdk.NewInt64Coin("test", 10), sdk.NewInt64Coin("utxo", 10)),
 		)
 

@@ -174,7 +174,7 @@ func (k BaseKeeper) DelegateCoins(ctx sdk.Context, delegatorAddr, moduleAccAddr 
 	}
 	// emit coin spent event
 	ctx.EventManager().EmitEvent(
-		types.NewCoinSpentEvent(delegatorAddr, amt),
+		types.NewCoinSpentEvent(delegatorAddr, amt, balances),
 	)
 
 	err := k.addCoins(ctx, moduleAccAddr, amt)
