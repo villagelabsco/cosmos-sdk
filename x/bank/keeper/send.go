@@ -260,6 +260,7 @@ func (k BaseSendKeeper) subUnlockedCoins(ctx context.Context, addr sdk.AccAddres
 	}
 
 	lockedCoins := k.LockedCoins(ctx, addr)
+	balances := sdk.NewCoins()
 
 	for _, coin := range amt {
 		balance := k.GetBalance(ctx, addr, coin.Denom)
@@ -283,6 +284,7 @@ func (k BaseSendKeeper) subUnlockedCoins(ctx context.Context, addr sdk.AccAddres
 		}
 
 		newBalance := balance.Sub(coin)
+		balances = balances.Add(newBalance)
 
 		if err := k.setBalance(ctx, addr, newBalance); err != nil {
 			return err
@@ -291,7 +293,7 @@ func (k BaseSendKeeper) subUnlockedCoins(ctx context.Context, addr sdk.AccAddres
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx.EventManager().EmitEvent(
-		types.NewCoinSpentEvent(addr, amt),
+		types.NewCoinSpentEvent(addr, amt, balances),
 	)
 
 	return nil
@@ -304,9 +306,11 @@ func (k BaseSendKeeper) addCoins(ctx context.Context, addr sdk.AccAddress, amt s
 		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, amt.String())
 	}
 
+	balances := sdk.NewCoins()
 	for _, coin := range amt {
 		balance := k.GetBalance(ctx, addr, coin.Denom)
 		newBalance := balance.Add(coin)
+		balances = balances.Add(newBalance)
 
 		err := k.setBalance(ctx, addr, newBalance)
 		if err != nil {
@@ -315,9 +319,14 @@ func (k BaseSendKeeper) addCoins(ctx context.Context, addr sdk.AccAddress, amt s
 	}
 
 	// emit coin received event
+<<<<<<< HEAD
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx.EventManager().EmitEvent(
 		types.NewCoinReceivedEvent(addr, amt),
+=======
+	ctx.EventManager().EmitEvent(
+		types.NewCoinReceivedEvent(addr, amt, balances),
+>>>>>>> 84abd60c5e (Bank send events: emit the updated balance along with the update)
 	)
 
 	return nil

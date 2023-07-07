@@ -154,7 +154,7 @@ func (k BaseKeeper) DelegateCoins(ctx context.Context, delegatorAddr, moduleAccA
 	// emit coin spent event
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx.EventManager().EmitEvent(
-		types.NewCoinSpentEvent(delegatorAddr, amt),
+		types.NewCoinSpentEvent(delegatorAddr, amt, balances),
 	)
 
 	err := k.addCoins(ctx, moduleAccAddr, amt)
