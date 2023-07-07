@@ -21,23 +21,26 @@ const (
 	AttributeKeyReceiver = "receiver"
 	AttributeKeyMinter   = "minter"
 	AttributeKeyBurner   = "burner"
+	AttributeKeyUpdtBal  = "balance"
 )
 
 // NewCoinSpentEvent constructs a new coin spent sdk.Event
-func NewCoinSpentEvent(spender sdk.AccAddress, amount sdk.Coins) sdk.Event {
+func NewCoinSpentEvent(spender sdk.AccAddress, amount sdk.Coins, updatedBalance sdk.Coins) sdk.Event {
 	return sdk.NewEvent(
 		EventTypeCoinSpent,
 		sdk.NewAttribute(AttributeKeySpender, spender.String()),
 		sdk.NewAttribute(sdk.AttributeKeyAmount, amount.String()),
+		sdk.NewAttribute(AttributeKeyUpdtBal, updatedBalance.String()),
 	)
 }
 
 // NewCoinReceivedEvent constructs a new coin received sdk.Event
-func NewCoinReceivedEvent(receiver sdk.AccAddress, amount sdk.Coins) sdk.Event {
+func NewCoinReceivedEvent(receiver sdk.AccAddress, amount sdk.Coins, updatedBalance sdk.Coins) sdk.Event {
 	return sdk.NewEvent(
 		EventTypeCoinReceived,
 		sdk.NewAttribute(AttributeKeyReceiver, receiver.String()),
 		sdk.NewAttribute(sdk.AttributeKeyAmount, amount.String()),
+		sdk.NewAttribute(AttributeKeyUpdtBal, updatedBalance.String()),
 	)
 }
 
