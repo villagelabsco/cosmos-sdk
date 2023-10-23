@@ -26,6 +26,7 @@ import (
 
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/math/unsafe"
 	pruningtypes "cosmossdk.io/store/pruning/types"
@@ -108,28 +109,29 @@ type Config struct {
 	LegacyAmino       *codec.LegacyAmino // TODO: Remove!
 	InterfaceRegistry codectypes.InterfaceRegistry
 
-	TxConfig         client.TxConfig
-	AccountRetriever client.AccountRetriever
-	AppConstructor   AppConstructor             // the ABCI application constructor
-	GenesisState     map[string]json.RawMessage // custom genesis state to provide
-	TimeoutCommit    time.Duration              // the consensus commitment timeout
-	ChainID          string                     // the network chain-id
-	NumValidators    int                        // the total number of validators to create and bond
-	Mnemonics        []string                   // custom user-provided validator operator mnemonics
-	BondDenom        string                     // the staking bond denomination
-	MinGasPrices     string                     // the minimum gas prices each validator will accept
-	AccountTokens    sdkmath.Int                // the amount of unique validator tokens (e.g. 1000node0)
-	StakingTokens    sdkmath.Int                // the amount of tokens each validator has available to stake
-	BondedTokens     sdkmath.Int                // the amount of tokens each validator stakes
-	PruningStrategy  string                     // the pruning strategy each validator will have
-	EnableLogging    bool                       // enable logging to STDOUT
-	CleanupDir       bool                       // remove base temporary directory during cleanup
-	SigningAlgo      string                     // signing algorithm for keys
-	KeyringOptions   []keyring.Option           // keyring configuration options
-	RPCAddress       string                     // RPC listen address (including port)
-	APIAddress       string                     // REST API listen address (including port)
-	GRPCAddress      string                     // GRPC server listen address (including port)
-	PrintMnemonic    bool                       // print the mnemonic of first validator as log output for testing
+	TxConfig                 client.TxConfig
+	AccountRetriever         client.AccountRetriever
+	AppConstructor           AppConstructor             // the ABCI application constructor
+	GenesisState             map[string]json.RawMessage // custom genesis state to provide
+	TargetHeightDuration     time.Duration              // the consensus target base duration
+	PostTargetBufferDuration time.Duration              // the consensus additional buffer timeout
+	ChainID                  string                     // the network chain-id
+	NumValidators            int                        // the total number of validators to create and bond
+	Mnemonics                []string                   // custom user-provided validator operator mnemonics
+	BondDenom                string                     // the staking bond denomination
+	MinGasPrices             string                     // the minimum gas prices each validator will accept
+	AccountTokens            math.Int                   // the amount of unique validator tokens (e.g. 1000node0)
+	StakingTokens            math.Int                   // the amount of tokens each validator has available to stake
+	BondedTokens             math.Int                   // the amount of tokens each validator stakes
+	PruningStrategy          string                     // the pruning strategy each validator will have
+	EnableLogging            bool                       // enable logging to STDOUT
+	CleanupDir               bool                       // remove base temporary directory during cleanup
+	SigningAlgo              string                     // signing algorithm for keys
+	KeyringOptions           []keyring.Option           // keyring configuration options
+	RPCAddress               string                     // RPC listen address (including port)
+	APIAddress               string                     // REST API listen address (including port)
+	GRPCAddress              string                     // GRPC server listen address (including port)
+	PrintMnemonic            bool                       // print the mnemonic of first validator as log output for testing
 }
 
 // DefaultConfig returns a sane default configuration suitable for nearly all
@@ -138,26 +140,27 @@ func DefaultConfig(factory TestFixtureFactory) Config {
 	fixture := factory()
 
 	return Config{
-		Codec:             fixture.EncodingConfig.Codec,
-		TxConfig:          fixture.EncodingConfig.TxConfig,
-		LegacyAmino:       fixture.EncodingConfig.Amino,
-		InterfaceRegistry: fixture.EncodingConfig.InterfaceRegistry,
-		AccountRetriever:  authtypes.AccountRetriever{},
-		AppConstructor:    fixture.AppConstructor,
-		GenesisState:      fixture.GenesisState,
-		TimeoutCommit:     2 * time.Second,
-		ChainID:           "chain-" + unsafe.Str(6),
-		NumValidators:     4,
-		BondDenom:         sdk.DefaultBondDenom,
-		MinGasPrices:      fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
-		AccountTokens:     sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction),
-		StakingTokens:     sdk.TokensFromConsensusPower(500, sdk.DefaultPowerReduction),
-		BondedTokens:      sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction),
-		PruningStrategy:   pruningtypes.PruningOptionNothing,
-		CleanupDir:        true,
-		SigningAlgo:       string(hd.Secp256k1Type),
-		KeyringOptions:    []keyring.Option{},
-		PrintMnemonic:     false,
+		Codec:                    fixture.EncodingConfig.Codec,
+		TxConfig:                 fixture.EncodingConfig.TxConfig,
+		LegacyAmino:              fixture.EncodingConfig.Amino,
+		InterfaceRegistry:        fixture.EncodingConfig.InterfaceRegistry,
+		AccountRetriever:         authtypes.AccountRetriever{},
+		AppConstructor:           fixture.AppConstructor,
+		GenesisState:             fixture.GenesisState,
+		TargetHeightDuration:     800 * time.Millisecond,
+		PostTargetBufferDuration: 300 * time.Millisecond,
+		ChainID:                  "chain-" + tmrand.Str(6),
+		NumValidators:            4,
+		BondDenom:                sdk.DefaultBondDenom,
+		MinGasPrices:             fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
+		AccountTokens:            sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction),
+		StakingTokens:            sdk.TokensFromConsensusPower(500, sdk.DefaultPowerReduction),
+		BondedTokens:             sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction),
+		PruningStrategy:          pruningtypes.PruningOptionNothing,
+		CleanupDir:               true,
+		SigningAlgo:              string(hd.Secp256k1Type),
+		KeyringOptions:           []keyring.Option{},
+		PrintMnemonic:            false,
 	}
 }
 
@@ -367,8 +370,22 @@ func New(l Logger, baseDir string, cfg Config) (*Network, error) {
 		appCfg.Telemetry.Enabled = false
 
 		ctx := server.NewDefaultContext()
-		cmtCfg := ctx.Config
-		cmtCfg.Consensus.TimeoutCommit = cfg.TimeoutCommit
+
+		tmCfg := ctx.Config
+		tmCfg.Consensus.TargetHeightDuration = cfg.TargetHeightDuration
+		tmCfg.Consensus.PostTargetBufferDuration = cfg.PostTargetBufferDuration
+		tmCfg.Consensus.ChainID = "chain-" + unsafe.Str(6)
+		tmCfg.Consensus.NumValidators = 4
+		tmCfg.Consensus.BondDenom = sdk.DefaultBondDenom
+		tmCfg.Consensus.MinGasPrices = fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom)
+		tmCfg.Consensus.AccountTokens = sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction)
+		tmCfg.Consensus.StakingTokens = sdk.TokensFromConsensusPower(500, sdk.DefaultPowerReduction)
+		tmCfg.Consensus.BondedTokens = sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
+		tmCfg.Consensus.PruningStrategy = pruningtypes.PruningOptionNothing
+		tmCfg.Consensus.CleanupDir = true
+		tmCfg.Consensus.SigningAlgo = string(hd.Secp256k1Type)
+		tmCfg.Consensus.KeyringOptions = []keyring.Option{}
+		tmCfg.Consensus.PrintMnemonic = false
 
 		// Only allow the first validator to expose an RPC, API and gRPC
 		// server/client due to CometBFT in-process constraints.
@@ -702,7 +719,13 @@ func (n *Network) LatestHeight() (int64, error) {
 // committed after a given block. If that height is not reached within a timeout,
 // an error is returned. Regardless, the latest height queried is returned.
 func (n *Network) WaitForHeight(h int64) (int64, error) {
-	return n.WaitForHeightWithTimeout(h, 10*time.Second)
+	// Some blocks may be very heavy - consider a 60s wait a possibility
+	timeout := 60 * n.Config.TargetHeightDuration
+	if timeout < 60*time.Second {
+		timeout = 60 * time.Second
+	}
+
+	return n.WaitForHeightWithTimeout(h, timeout)
 }
 
 // WaitForHeightWithTimeout is the same as WaitForHeight except the caller can
