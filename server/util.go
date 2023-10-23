@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/cast"
@@ -234,9 +233,6 @@ func interceptConfigs(rootViper *viper.Viper, customAppTemplate string, customCo
 		defaultCometCfg := tmcfg.DefaultConfig()
 		// The SDK is opinionated about those comet values, so we set them here.
 		// We verify first that the user has not changed them for not overriding them.
-		if conf.Consensus.TimeoutCommit == defaultCometCfg.Consensus.TimeoutCommit {
-			conf.Consensus.TimeoutCommit = 5 * time.Second
-		}
 		if conf.RPC.PprofListenAddress == defaultCometCfg.RPC.PprofListenAddress {
 			conf.RPC.PprofListenAddress = "localhost:6060"
 		}
