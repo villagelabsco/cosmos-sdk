@@ -170,7 +170,9 @@ func (k BaseKeeper) DelegateCoins(ctx sdk.Context, delegatorAddr, moduleAccAddr 
 		return sdkerrors.Wrap(err, "failed to track delegation")
 	}
 	// emit coin spent event
-	ctx.EventManager().EmitTypedEvent(&types.CoinSpent{Spender: delegatorAddr.String(), Amount: amt, UpdatedBal: balances})
+	ctx.EventManager().EmitEvent(
+		types.NewCoinSpentEvent(delegatorAddr, amt, balances),
+	)
 
 	err := k.addCoins(ctx, moduleAccAddr, amt)
 	if err != nil {
