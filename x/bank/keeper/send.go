@@ -319,14 +319,9 @@ func (k BaseSendKeeper) addCoins(ctx context.Context, addr sdk.AccAddress, amt s
 	}
 
 	// emit coin received event
-<<<<<<< HEAD
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx.EventManager().EmitEvent(
-		types.NewCoinReceivedEvent(addr, amt),
-=======
-	ctx.EventManager().EmitEvent(
 		types.NewCoinReceivedEvent(addr, amt, balances),
->>>>>>> 84abd60c5e (Bank send events: emit the updated balance along with the update)
 	)
 
 	return nil
