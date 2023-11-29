@@ -23,6 +23,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v1.0.1-village
+
+* Apply some village-specific changes
+
 ## v1.0.1 (November 28, 2023)
 
 ### Bug Fixes
