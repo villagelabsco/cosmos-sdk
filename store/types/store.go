@@ -48,6 +48,7 @@ type RequestQuery struct {
 	Path   string
 	Height int64
 	Prove  bool
+	Permit string
 }
 
 type ResponseQuery struct {
