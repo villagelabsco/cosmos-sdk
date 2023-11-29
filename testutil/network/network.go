@@ -28,7 +28,6 @@ import (
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
-	"cosmossdk.io/math/unsafe"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -149,7 +148,7 @@ func DefaultConfig(factory TestFixtureFactory) Config {
 		GenesisState:             fixture.GenesisState,
 		TargetHeightDuration:     800 * time.Millisecond,
 		PostTargetBufferDuration: 300 * time.Millisecond,
-		ChainID:                  "chain-" + tmrand.Str(6),
+		ChainID:                  "chain",
 		NumValidators:            4,
 		BondDenom:                sdk.DefaultBondDenom,
 		MinGasPrices:             fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
@@ -371,21 +370,9 @@ func New(l Logger, baseDir string, cfg Config) (*Network, error) {
 
 		ctx := server.NewDefaultContext()
 
-		tmCfg := ctx.Config
-		tmCfg.Consensus.TargetHeightDuration = cfg.TargetHeightDuration
-		tmCfg.Consensus.PostTargetBufferDuration = cfg.PostTargetBufferDuration
-		tmCfg.Consensus.ChainID = "chain-" + unsafe.Str(6)
-		tmCfg.Consensus.NumValidators = 4
-		tmCfg.Consensus.BondDenom = sdk.DefaultBondDenom
-		tmCfg.Consensus.MinGasPrices = fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom)
-		tmCfg.Consensus.AccountTokens = sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction)
-		tmCfg.Consensus.StakingTokens = sdk.TokensFromConsensusPower(500, sdk.DefaultPowerReduction)
-		tmCfg.Consensus.BondedTokens = sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
-		tmCfg.Consensus.PruningStrategy = pruningtypes.PruningOptionNothing
-		tmCfg.Consensus.CleanupDir = true
-		tmCfg.Consensus.SigningAlgo = string(hd.Secp256k1Type)
-		tmCfg.Consensus.KeyringOptions = []keyring.Option{}
-		tmCfg.Consensus.PrintMnemonic = false
+		cmtCfg := ctx.Config
+		cmtCfg.Consensus.TargetHeightDuration = cfg.TargetHeightDuration
+		cmtCfg.Consensus.PostTargetBufferDuration = cfg.PostTargetBufferDuration
 
 		// Only allow the first validator to expose an RPC, API and gRPC
 		// server/client due to CometBFT in-process constraints.

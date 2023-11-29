@@ -1161,10 +1161,10 @@ func checkNegativeHeight(height int64) error {
 
 func checkInvalidPermit(authHeader []string) error {
 	if len(authHeader) != 2 {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "invalid auth header, expected Bearer <token>")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "invalid auth header, expected Bearer <token>")
 	}
 	if authHeader[0] != "Bearer" {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "invalid auth header, expected Bearer <token>")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "invalid auth header, expected Bearer <token>")
 	}
 	return nil
 }
